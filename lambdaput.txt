@@ -1,0 +1,38 @@
+'use strict';
+
+console.log('Loading function');
+
+const AWS = require('aws-sdk');
+const docClient = new AWS.DynamoDB.DocumentClient({ region: 'us-east-1' });
+
+exports.handler = async (event, context, callback) => {
+
+const e = JSON.parse(event.body);
+await putComment(e).then(() => {
+    callback(null, {
+        statusCode: 201,
+        body: JSON.stringify(e),
+        headers: {
+            "Access-Control-Allow-Origin": "*",
+            "Content-Type": "application/json"
+        }
+    });
+}).catch((err) => {
+    console.error(err)
+})    
+};
+
+
+function putComment(event) {
+    const params = {
+        TableName: "newProjectTable",
+        Item: {
+        name: event.name,
+        message: event.message
+        }
+    }
+    
+
+    return docClient.put(params).promise();
+    
+}
